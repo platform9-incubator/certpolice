@@ -15,6 +15,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"strings"
 	"time"
 )
 
@@ -175,7 +176,7 @@ func doInternal(keypath string,
 		fmt.Printf("%s certfile doesn't exist, generating new...\n")
 	}
 
-	keyBytes, _ := rsa.GenerateKey(rand.Reader, 1024)
+	keyBytes, _ := rsa.GenerateKey(rand.Reader, 2048)
 
 	emailAddress := "test@example.com"
 	var oidEmailAddress = asn1.ObjectIdentifier{1, 2, 840, 113549, 1, 9, 1}
@@ -205,7 +206,9 @@ func doInternal(keypath string,
 	fmt.Println(csr.String())
 
 	// send the csr to vault
-	body := fmt.Sprintf(`{"csr": "%s", "ttl": "5m"}`, csr.String())
+	cleancsr := strings.Replace(csr.String(), "\n", "\\n", -1)
+	body := fmt.Sprintf(`{"csr": "%s", "ttl": "5m"}`, cleancsr)
+	fmt.Println(body)
 	var vaultUrl = vaultspec.Url
 	var fullUrl = fmt.Sprintf("%s/v1/%s/sign/internal", vaultUrl, ca_name)
 	var client = &http.Client{Timeout: time.Second * 10}
@@ -223,7 +226,7 @@ func doInternal(keypath string,
 		log.Printf("Failed to send request #%v ", err)
 		panic("")
 	}
-    fmt.Println(resp)
+	fmt.Println(resp)
 }
 
 func main() {
