@@ -1,0 +1,31 @@
+---
+notify: 48h
+refresh: 24h
+notify-hook: https://hooks.slack.com/services/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
+
+vaults:
+  vault-dev:
+    url: https://vault-dev.platform9.horse:8200
+    token: XXXXX
+
+internal-cas:
+  bobhack:
+    vault: vault-dev
+    cname: bobhack.platform9.horse
+    cert: /etc/pf9/certs/ca.pem
+    default-duration: 730h
+
+internal-certs:
+  - name: broker
+    ca: bobhack
+    cert: /etc/pf9/certs/broker/cert.pem
+    key: /etc/pf9/certs/broker/key.pem
+    combined: /etc/pf9/certs/full.pem
+
+external-certs:
+  - name: web
+    vault: vault-dev
+    secret-path: external-certs/wildcard-horse
+    cert: /etc/pf9/certs/web/cert.pem
+    key: /etc/pf9/certs/web/key.pem
+    combined: /etc/pf9/web/full.pem
